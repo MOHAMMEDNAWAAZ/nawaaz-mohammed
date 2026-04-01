@@ -193,12 +193,12 @@ img { max-width: 100%; display: block; }
 }
 
 #navbar.scrolled {
-  background: rgba(10, 14, 26, 0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--clr-border);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: none;
   padding: 14px 0;
-  box-shadow: var(--shadow-md);
+  box-shadow: none;
 }
 
 .nav-container {
