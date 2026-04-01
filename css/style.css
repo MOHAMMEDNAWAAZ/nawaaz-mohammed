@@ -444,9 +444,6 @@ img { max-width: 100%; display: block; }
   animation: fadeUp 0.7s ease 1.4s forwards;
 }
 
-.scroll-pulse {
-  /* kept for backwards compat — pulse is now driven by .is-pulsing via JS */
-}
 
 .hero-scroll-hint.is-pulsing {
   animation: scrollPulse 1.1s ease-in-out infinite;
@@ -1190,67 +1187,6 @@ img { max-width: 100%; display: block; }
   font-weight: 500;
 }
 
-/* Map visual */
-.contact-map-card {
-  background: var(--gradient-card);
-  border: 1px solid var(--clr-border);
-  border-radius: var(--radius-xl);
-  height: 360px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.contact-map-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, rgba(0,212,255,0.06) 0%, transparent 60%);
-}
-
-.map-visual {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-}
-
-.map-pin {
-  font-size: 3.5rem;
-  color: var(--clr-accent);
-  filter: drop-shadow(0 0 20px rgba(0,212,255,0.5));
-  animation: float 3s ease-in-out infinite;
-  display: block;
-  margin-bottom: 16px;
-}
-
-.map-label {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--clr-white);
-}
-
-.map-circles {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-.map-circle {
-  position: absolute;
-  border-radius: 50%;
-  border: 1px solid rgba(0, 212, 255, 0.2);
-  transform: translate(-50%, -50%);
-  animation: ripple 3s ease-out infinite;
-}
-
-.c1 { width: 120px; height: 120px; animation-delay: 0s; }
-.c2 { width: 200px; height: 200px; animation-delay: 0.8s; }
-.c3 { width: 300px; height: 300px; animation-delay: 1.6s; }
-
 /* ============================================================
    FOOTER
    ============================================================ */
@@ -1407,10 +1343,6 @@ img { max-width: 100%; display: block; }
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(7px); }
-}
-
-@keyframes scrollPop {
-  /* legacy — no longer used */
 }
 
 @keyframes scrollPulse {
