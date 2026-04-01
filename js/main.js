@@ -388,38 +388,49 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
     })
     .catch(() => {});
 
-  // GPS pinpoint — mandatory, form blocked if denied
-  const form    = document.querySelector('.contact-form');
-  const geoErr  = document.getElementById('form-geo-error');
+  // GPS pinpoint — mandatory, form is blocked if denied
+  const form   = document.querySelector('.contact-form');
+  const geoErr = document.getElementById('form-geo-error');
 
-  function showGeoError() {
-    if (geoErr) {
-      geoErr.style.display = 'block';
-      geoErr.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  // Declared as a statement so it is hoisted and accessible everywhere below
+  function handleGeoSubmit(e) {
+    e.preventDefault();
+    form.removeEventListener('submit', handleGeoSubmit);
+    if (geoErr) geoErr.style.display = 'none';
+
+    if (!('geolocation' in navigator)) {
+      // Browser has no geolocation support — block and inform
+      if (geoErr) {
+        geoErr.style.display = 'block';
+        geoErr.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      form.addEventListener('submit', handleGeoSubmit);
+      return;
     }
-    // Re-attach listener so user can retry after allowing in browser settings
-    form.addEventListener('submit', handleGeoSubmit);
+
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const lat = pos.coords.latitude.toFixed(6);
+        const lng = pos.coords.longitude.toFixed(6);
+        const acc = Math.round(pos.coords.accuracy);
+        set('sender-gps-link',
+          'https://www.google.com/maps?q=' + lat + ',' + lng +
+          ' (accuracy: \u00b1' + acc + 'm)');
+        form.submit();
+      },
+      () => {
+        // Denied, dismissed, or timed out — block the form, show error, allow retry
+        if (geoErr) {
+          geoErr.style.display = 'block';
+          geoErr.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        form.addEventListener('submit', handleGeoSubmit);
+      },
+      { timeout: 10000, maximumAge: 60000 }
+    );
   }
 
-  if (form && 'geolocation' in navigator) {
-    form.addEventListener('submit', function handleGeoSubmit(e) {
-      e.preventDefault();
-      form.removeEventListener('submit', handleGeoSubmit);
-      if (geoErr) geoErr.style.display = 'none';
-
-      navigator.geolocation.getCurrentPosition(
-        pos => {
-          const lat = pos.coords.latitude.toFixed(6);
-          const lng = pos.coords.longitude.toFixed(6);
-          const acc = Math.round(pos.coords.accuracy);
-          set('sender-gps-link',
-            'https://www.google.com/maps?q=' + lat + ',' + lng +
-            ' (accuracy: \u00b1' + acc + 'm)');
-          form.submit();
-        },
-        () => { showGeoError(); },  // denied or timed out — block form
-        { timeout: 10000, maximumAge: 60000 }
-      );
-    });
+  if (form) {
+    form.addEventListener('submit', handleGeoSubmit);
   }
 })();
