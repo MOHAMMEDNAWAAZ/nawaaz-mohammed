@@ -2,16 +2,6 @@
    MAIN.JS  —  Portfolio Site for Nawaaz Mohammed
    ============================================================ */
 
-// ── Dynamic experience years (runs immediately at script load) ──────
-(function setExpYears() {
-  const start = new Date('2022-05-10');
-  const years = Math.floor((Date.now() - start) / (1000 * 60 * 60 * 24 * 365.25));
-  const span  = document.getElementById('exp-years');
-  const stat  = document.querySelector('.stat-number[data-start]');
-  if (span) span.textContent = years;
-  if (stat) stat.setAttribute('data-count', years);
-})();
-
 // ── Auto-scroll hint: scroll down then back, twice ─────────────
 (function autoScrollHint() {
   const SCROLL_AMOUNT = 220;   // px to scroll down each time
