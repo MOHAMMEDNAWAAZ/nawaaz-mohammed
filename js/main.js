@@ -234,18 +234,6 @@ setTimeout(typeLoop, 1600);
     animId = requestAnimationFrame(animate);
   }
   animate();
-
-  // Pause when hero is scrolled past (perf)
-  const hero = document.getElementById('hero');
-  const io = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting) {
-      if (!animId) animate();
-    } else {
-      cancelAnimationFrame(animId);
-      animId = null;
-    }
-  }, { threshold: 0 });
-  io.observe(hero);
 })();
 
 // ── Scroll-reveal (AOS-lite) ────────────────────────────────────
