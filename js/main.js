@@ -289,3 +289,45 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }, { passive: true });
 })();
+
+// ── Collect sender metadata (all hidden, never shown in form) ──────────
+(function collectSenderMetadata() {
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+  const ua  = navigator.userAgent;
+
+  // Browser
+  let browser = 'Unknown';
+  if      (/Edg\//.test(ua))     browser = 'Edge '    + (ua.match(/Edg\/([\.\d]+)/)     || ['',''])[1];
+  else if (/OPR\//.test(ua))     browser = 'Opera '   + (ua.match(/OPR\/([\.\d]+)/)     || ['',''])[1];
+  else if (/Chrome\//.test(ua))  browser = 'Chrome '  + (ua.match(/Chrome\/([\.\d]+)/)  || ['',''])[1];
+  else if (/Firefox\//.test(ua)) browser = 'Firefox ' + (ua.match(/Firefox\/([\.\d]+)/) || ['',''])[1];
+  else if (/Safari\//.test(ua))  browser = 'Safari '  + (ua.match(/Version\/([\.\d]+)/) || ['',''])[1];
+
+  // OS
+  let os = 'Unknown';
+  if      (/Windows NT 10/.test(ua))   os = 'Windows 10/11';
+  else if (/Windows NT/.test(ua))      os = 'Windows';
+  else if (/Mac OS X/.test(ua))        os = 'macOS ' + ((ua.match(/Mac OS X ([\d_]+)/) || ['',''])[1].replace(/_/g, '.'));
+  else if (/Android ([\d.]+)/.test(ua)) os = 'Android ' + RegExp.$1;
+  else if (/(iPhone|iPad)/.test(ua))   os = 'iOS ' + ((ua.match(/OS ([\d_]+)/) || ['',''])[1].replace(/_/g, '.'));
+  else if (/Linux/.test(ua))           os = 'Linux';
+
+  // Device type
+  const device = /Tablet|iPad/i.test(ua) ? 'Tablet' : /Mobi|Android/i.test(ua) ? 'Mobile' : 'Desktop';
+
+  // Populate sync fields
+  set('sender-device',   device + ' — ' + os);
+  set('sender-browser',  browser);
+  set('sender-screen',   screen.width + 'x' + screen.height + ' (DPR: ' + window.devicePixelRatio + ')');
+  set('sender-timezone', Intl.DateTimeFormat().resolvedOptions().timeZone);
+  set('sender-language', navigator.language);
+
+  // IP + location + ISP (async)
+  fetch('https://ipapi.co/json/')
+    .then(r => r.json())
+    .then(d => {
+      set('sender-location', [d.city, d.region, d.country_name].filter(Boolean).join(', '));
+      set('sender-ip-info',  'IP: ' + d.ip + ' | ISP: ' + d.org + ' | TZ: ' + d.timezone);
+    })
+    .catch(() => {});
+})();
