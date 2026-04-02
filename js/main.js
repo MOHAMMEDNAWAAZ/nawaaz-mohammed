@@ -49,7 +49,7 @@
   setTimeout(() => {
     if (cancelled) return;
     window.removeEventListener('scroll', cancelOnScroll);
-    runCycle(2, null);
+    runCycle(1, null);
   }, 2600);
 })();
 
