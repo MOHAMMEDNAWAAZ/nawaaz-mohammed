@@ -485,15 +485,46 @@ document.querySelectorAll('a[download]').forEach(link => {
   // Share button
   if (shareBtn) {
     shareBtn.addEventListener('click', () => {
-      if (navigator.share) {
+      const pdfUrl = 'Nawaaz_Mohammed_resume.pdf';
+      const fileName = 'Nawaaz_Mohammed_Resume.pdf';
+
+      // Try to share as actual file (Web Share API Level 2)
+      if (navigator.canShare) {
+        shareBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        fetch(pdfUrl)
+          .then(r => r.blob())
+          .then(blob => {
+            const file = new File([blob], fileName, { type: 'application/pdf' });
+            if (navigator.canShare({ files: [file] })) {
+              return navigator.share({
+                title: 'Nawaaz Mohammed — Resume',
+                text: 'Resume of Nawaaz Mohammed, DevOps Engineer',
+                files: [file]
+              });
+            } else {
+              // Device doesn't support file sharing, fall back to URL share
+              return navigator.share({
+                title: 'Nawaaz Mohammed — Resume',
+                text: 'Resume of Nawaaz Mohammed, DevOps Engineer',
+                url: window.location.origin + '/' + pdfUrl
+              });
+            }
+          })
+          .then(() => {
+            shareBtn.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => { shareBtn.innerHTML = '<i class="fas fa-share-alt"></i>'; }, 2000);
+          })
+          .catch(() => { shareBtn.innerHTML = '<i class="fas fa-share-alt"></i>'; });
+      } else if (navigator.share) {
+        // Fallback: share URL
         navigator.share({
           title: 'Nawaaz Mohammed — Resume',
-          text: 'Check out Nawaaz Mohammed\'s resume',
-          url: window.location.origin + '/Nawaaz_Mohammed_resume.pdf'
+          text: 'Resume of Nawaaz Mohammed, DevOps Engineer',
+          url: window.location.origin + '/' + pdfUrl
         }).catch(() => {});
       } else {
-        // Fallback: copy link to clipboard
-        navigator.clipboard.writeText(window.location.origin + '/Nawaaz_Mohammed_resume.pdf')
+        // Last resort: copy link to clipboard
+        navigator.clipboard.writeText(window.location.origin + '/' + pdfUrl)
           .then(() => {
             shareBtn.innerHTML = '<i class="fas fa-check"></i>';
             setTimeout(() => { shareBtn.innerHTML = '<i class="fas fa-share-alt"></i>'; }, 2000);
