@@ -582,4 +582,148 @@ document.querySelectorAll('a[download]').forEach(link => {
     });
   }
 })();
+// ── 3D Card Tilt on mouse move ──────────────────────────────────
+(function init3DTilt() {
+  const MAX_TILT = 12;
 
+  function applyTilt(card, e) {
+    const rect = card.getBoundingClientRect();
+    const cx   = rect.left + rect.width  / 2;
+    const cy   = rect.top  + rect.height / 2;
+    const dx   = (e.clientX - cx) / (rect.width  / 2);
+    const dy   = (e.clientY - cy) / (rect.height / 2);
+    const rotY =  dx * MAX_TILT;
+    const rotX = -dy * MAX_TILT;
+    card.style.transform  = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.03,1.03,1.03)`;
+    card.style.boxShadow  = `${-rotY * 1.5}px ${rotX * 1.5}px 40px rgba(0,212,255,0.18), 0 8px 48px rgba(0,0,0,0.5)`;
+    card.style.borderColor = 'rgba(0,212,255,0.4)';
+    const shine = card.querySelector('.tilt-shine');
+    if (shine) {
+      shine.style.background = `radial-gradient(circle at ${50 + dx*30}% ${50 + dy*30}%, rgba(255,255,255,0.11) 0%, transparent 65%)`;
+      shine.style.opacity = '1';
+    }
+  }
+
+  function resetTilt(card) {
+    card.style.transform   = '';
+    card.style.boxShadow   = '';
+    card.style.borderColor = '';
+    const shine = card.querySelector('.tilt-shine');
+    if (shine) { shine.style.background = ''; shine.style.opacity = ''; }
+  }
+
+  document.querySelectorAll('.tilt-card').forEach(card => {
+    card.addEventListener('mousemove', e => applyTilt(card, e), { passive: true });
+    card.addEventListener('mouseleave', () => resetTilt(card));
+  });
+})();
+
+// ── Hero 3D Mouse Parallax ──────────────────────────────────────
+(function initHeroParallax() {
+  const hero    = document.getElementById('hero');
+  const content = hero ? hero.querySelector('.hero-content') : null;
+  if (!hero || !content) return;
+
+  const layers = [
+    { el: content.querySelector('.hero-greeting'),  depth: 0.012 },
+    { el: content.querySelector('.hero-name'),       depth: 0.025 },
+    { el: content.querySelector('.hero-title-wrap'), depth: 0.018 },
+    { el: content.querySelector('.hero-tagline'),    depth: 0.010 },
+    { el: content.querySelector('.hero-cta'),        depth: 0.008 },
+    { el: content.querySelector('.hero-socials'),    depth: 0.006 },
+  ].filter(l => l.el);
+
+  let targetX = 0, targetY = 0, currentX = 0, currentY = 0, raf = null;
+
+  hero.addEventListener('mousemove', e => {
+    const rect = hero.getBoundingClientRect();
+    targetX = e.clientX - rect.left - rect.width  / 2;
+    targetY = e.clientY - rect.top  - rect.height / 2;
+    if (!raf) raf = requestAnimationFrame(tick);
+  }, { passive: true });
+
+  hero.addEventListener('mouseleave', () => { targetX = 0; targetY = 0; });
+
+  function tick() {
+    currentX += (targetX - currentX) * 0.07;
+    currentY += (targetY - currentY) * 0.07;
+    layers.forEach(({ el, depth }) => {
+      el.style.transform = `translate3d(${currentX * depth}px, ${currentY * depth}px, 0)`;
+    });
+    raf = requestAnimationFrame(tick);
+  }
+})();
+
+// ── 3D Depth Particle System (replaces 2D) ─────────────────────
+(function upgrade3DParticles() {
+  const canvas = document.getElementById('particleCanvas');
+  if (!canvas) return;
+  // Stop old 2D loop by replacing the canvas context draw — we hijack via new RAF
+  const ctx  = canvas.getContext('2d');
+  const FOCAL = 500;
+  let W, H, particles = [];
+
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+
+  class P3 {
+    constructor(init) { this.reset(init); }
+    reset(init) {
+      this.x  = (Math.random() - 0.5) * W * 2.2;
+      this.y  = (Math.random() - 0.5) * H * 2.2;
+      this.z  = init ? Math.random() * FOCAL : FOCAL;
+      this.vx = (Math.random() - 0.5) * 0.45;
+      this.vy = (Math.random() - 0.5) * 0.45;
+      this.vz = -(Math.random() * 0.9 + 0.15);
+    }
+    project() {
+      const s = FOCAL / (FOCAL + this.z);
+      return { sx: this.x * s + W / 2, sy: this.y * s + H / 2, size: Math.max(0.3, s * 2.4), alpha: Math.min(0.85, s * 0.75) };
+    }
+  }
+
+  const COUNT = Math.min(Math.floor((window.innerWidth * window.innerHeight) / 10000), 140);
+  for (let i = 0; i < COUNT; i++) particles.push(new P3(true));
+
+  function draw3D() {
+    ctx.clearRect(0, 0, W, H);
+    particles.sort((a, b) => b.z - a.z);
+
+    // Connections
+    for (let i = 0; i < particles.length; i++) {
+      const pi = particles[i].project();
+      for (let j = i + 1; j < particles.length; j++) {
+        const pj = particles[j].project();
+        const dist = Math.hypot(pi.sx - pj.sx, pi.sy - pj.sy);
+        if (dist < 120) {
+          ctx.save();
+          ctx.globalAlpha = (1 - dist / 120) * 0.13 * Math.min(pi.alpha, pj.alpha);
+          ctx.strokeStyle = '#00d4ff';
+          ctx.lineWidth   = 0.5;
+          ctx.beginPath(); ctx.moveTo(pi.sx, pi.sy); ctx.lineTo(pj.sx, pj.sy); ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }
+
+    // Particles
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.z += p.vz;
+      if (p.z <= 1) p.reset(false);
+      const { sx, sy, size, alpha } = p.project();
+      if (sx < -20 || sx > W + 20 || sy < -20 || sy > H + 20) return;
+      const t = 1 - p.z / FOCAL;
+      ctx.save();
+      ctx.globalAlpha  = alpha;
+      ctx.fillStyle    = `rgb(${Math.round(t*0)},${Math.round(100 + t*112)},${Math.round(180 + t*75)})`;
+      ctx.shadowBlur   = size * 4;
+      ctx.shadowColor  = `rgba(0,212,255,${alpha * 0.5})`;
+      ctx.beginPath(); ctx.arc(sx, sy, size, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    });
+
+    requestAnimationFrame(draw3D);
+  }
+  draw3D();
+})();

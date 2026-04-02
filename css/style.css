@@ -116,7 +116,31 @@ img { max-width: 100%; display: block; }
 }
 
 /* ============================================================
-   SCROLL ANIMATIONS
+   3D CARD TILT
+   ============================================================ */
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 0.08s linear, box-shadow 0.3s ease, border-color 0.3s ease;
+  will-change: transform;
+}
+
+.tilt-card .tilt-shine {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+}
+
+.tilt-card:hover .tilt-shine {
+  opacity: 1;
+}
+
+/* ============================================================
+   SCROLL ANIMATIONS — AOS-lite + 3D flip variant
    ============================================================ */
 [data-aos] {
   opacity: 0;
@@ -127,6 +151,17 @@ img { max-width: 100%; display: block; }
 [data-aos].aos-animate {
   opacity: 1;
   transform: translateY(0);
+}
+
+[data-aos="flip"] {
+  opacity: 0;
+  transform: perspective(600px) rotateX(30deg) translateY(40px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+[data-aos="flip"].aos-animate {
+  opacity: 1;
+  transform: perspective(600px) rotateX(0deg) translateY(0);
 }
 
 /* ============================================================
@@ -411,6 +446,13 @@ img { max-width: 100%; display: block; }
   background-clip: text;
   opacity: 0;
   animation: fadeUp 0.7s ease 0.4s forwards;
+  /* 3D depth text shadow (visible before clip on supported browsers) */
+  filter: drop-shadow(0 2px 8px rgba(0,212,255,0.35)) drop-shadow(0 0 40px rgba(0,212,255,0.15));
+  transition: filter 0.4s ease;
+}
+
+.hero-name:hover {
+  filter: drop-shadow(0 4px 24px rgba(0,212,255,0.6)) drop-shadow(0 0 60px rgba(124,58,237,0.3));
 }
 
 .hero-title-wrap {
