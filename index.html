@@ -586,11 +586,27 @@
     </div>
   </footer>
 
-  <!-- Floating download button -->
-  <a href="Nawaaz_Mohammed_resume.pdf" download class="fab-download" aria-label="Download Resume">
-    <i class="fas fa-download"></i>
-    <span class="fab-tooltip">Download Resume</span>
-  </a>
+  <!-- Floating share/download button group -->
+  <div class="fab-group" id="fabGroup">
+    <!-- Sub-action: Download -->
+    <div class="fab-sub-wrap">
+      <span class="fab-sub-label">Download</span>
+      <a href="Nawaaz_Mohammed_resume.pdf" download id="cv-download-fab" class="fab-sub" aria-label="Download Resume">
+        <i class="fas fa-download"></i>
+      </a>
+    </div>
+    <!-- Sub-action: Share -->
+    <div class="fab-sub-wrap">
+      <span class="fab-sub-label">Share</span>
+      <button class="fab-sub" id="fabShareBtn" aria-label="Share Resume">
+        <i class="fas fa-share-alt"></i>
+      </button>
+    </div>
+    <!-- Main toggle button -->
+    <button class="fab-main" id="fabMainBtn" aria-label="Resume options" aria-expanded="false">
+      <i class="fas fa-file-pdf"></i>
+    </button>
+  </div>
 
   <!-- Back to top -->
   <button id="backToTop" aria-label="Back to top"><i class="fas fa-arrow-up"></i></button>

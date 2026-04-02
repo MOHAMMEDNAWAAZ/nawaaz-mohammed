@@ -456,3 +456,50 @@ document.querySelectorAll('a[download]').forEach(link => {
   });
 });
 
+// ── Floating FAB group (toggle + share) ────────────────────────
+(function initFab() {
+  const group    = document.getElementById('fabGroup');
+  const mainBtn  = document.getElementById('fabMainBtn');
+  const shareBtn = document.getElementById('fabShareBtn');
+  if (!group || !mainBtn) return;
+
+  function toggleFab(force) {
+    const isOpen = force !== undefined ? force : !group.classList.contains('open');
+    group.classList.toggle('open', isOpen);
+    mainBtn.classList.toggle('open', isOpen);
+    mainBtn.setAttribute('aria-expanded', isOpen);
+    mainBtn.innerHTML = isOpen
+      ? '<i class="fas fa-times"></i>'
+      : '<i class="fas fa-file-pdf"></i>';
+  }
+
+  mainBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    toggleFab();
+  });
+
+  // Close when clicking outside
+  document.addEventListener('click', () => toggleFab(false));
+  group.addEventListener('click', e => e.stopPropagation());
+
+  // Share button
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      if (navigator.share) {
+        navigator.share({
+          title: 'Nawaaz Mohammed — Resume',
+          text: 'Check out Nawaaz Mohammed\'s resume',
+          url: window.location.origin + '/Nawaaz_Mohammed_resume.pdf'
+        }).catch(() => {});
+      } else {
+        // Fallback: copy link to clipboard
+        navigator.clipboard.writeText(window.location.origin + '/Nawaaz_Mohammed_resume.pdf')
+          .then(() => {
+            shareBtn.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => { shareBtn.innerHTML = '<i class="fas fa-share-alt"></i>'; }, 2000);
+          }).catch(() => {});
+      }
+    });
+  }
+})();
+
