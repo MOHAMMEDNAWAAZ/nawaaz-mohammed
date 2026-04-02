@@ -470,7 +470,7 @@ document.querySelectorAll('a[download]').forEach(link => {
     mainBtn.setAttribute('aria-expanded', isOpen);
     mainBtn.innerHTML = isOpen
       ? '<i class="fas fa-times"></i>'
-      : '<i class="fas fa-file-pdf"></i>';
+      : '<span class="fab-main-icons"><i class="fas fa-download"></i><i class="fas fa-share-alt"></i></span>';
   }
 
   mainBtn.addEventListener('click', e => {
